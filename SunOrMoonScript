@@ -1,0 +1,51 @@
+import datetime
+import subprocess
+import sys
+from PIL import ImageStat
+from PIL import Image
+
+
+photo_dir = str(sys.argv[1])
+photo_name = datetime.datetime.now().strftime('%Y-%m-%d_%H%M')
+photo_format = '.jpeg'
+raspistill = 'raspistill --verbose -t 1 '
+
+
+def take_a_night_photo():
+    cmd = raspistill + \
+          '-ex verylong -ss 10000000 -o ' + \
+          photo_dir + \
+          photo_name + photo_format
+    subprocess.call(cmd, shell=True)
+    return True
+
+
+def take_a_day_photo():
+    cmd = raspistill + ' -o ' + \
+          photo_dir + \
+          photo_name + photo_format
+    subprocess.call(cmd, shell=True)
+    return True
+
+
+def take_sample_photo():
+    cmd = 'raspistill -w 240 -h 360 -o ' + \
+            photo_dir + 'test' + photo_format
+    subprocess.call(cmd, shell=True)
+    return True
+
+
+def brightness( im_file ):
+    im = Image.open(im_file).convert('L');
+    stat = ImageStat.Stat(im);
+    return stat.rms[0];
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    take_sample_photo()
+    if brightness(photo_dir + 'test' + photo_format) < 40:
+        take_a_night_photo()
+    else:
+        take_a_day_photo()
+    # print('test: ' + str(brightness('/home/pi/Desktop/test.jpg')))
